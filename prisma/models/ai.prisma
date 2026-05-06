@@ -1,0 +1,39 @@
+// AI 分析：个体（幼儿 / 档案合并记录）与班级整体；主文先用 Markdown，后续可再拆四层子表
+
+model AiIndividualAnalysis {
+  id                     Int                   @id @default(autoincrement())
+  childId                Int
+  child                  Child                 @relation(fields: [childId], references: [id], onDelete: Cascade)
+  /// 针对某条档案 / 倾听合并记录的分析
+  portfolioArchiveItemId Int?
+  portfolioArchiveItem   PortfolioArchiveItem? @relation(fields: [portfolioArchiveItemId], references: [id], onDelete: SetNull)
+
+  contentMarkdown String
+  modelName       String?
+  promptVersion   String?
+  /// 导出 PDF 的公网 URL（S3/CDN）
+  exportPdfUrl    String?
+  exportPdfCacheKey String?
+  createdAt       DateTime @default(now())
+
+  @@index([childId, createdAt])
+  @@index([portfolioArchiveItemId])
+  @@map("ai_individual_analyses")
+}
+
+model AiClassAnalysis {
+  id              Int         @id @default(autoincrement())
+  classId         Int
+  schoolClass     SchoolClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  title           String?
+  periodNote      String?
+  contentMarkdown String
+  modelName       String?
+  promptVersion   String?
+  exportPdfUrl    String?
+  exportPdfCacheKey String?
+  createdAt       DateTime    @default(now())
+
+  @@index([classId, createdAt])
+  @@map("ai_class_analyses")
+}

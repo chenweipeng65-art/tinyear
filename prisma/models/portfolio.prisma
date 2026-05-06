@@ -1,0 +1,60 @@
+// 成长档案与倾听流程合并为一条表记录；画语图与列表缩略图共用 childArtImageUrl，不再单独维护「封面」字段。
+
+/// 成长档案条目（由原「倾听会话」与档案卡片合并；教师不绑定在此表）
+model PortfolioArchiveItem {
+  /// 主键，自增
+  id                         Int                    @id @default(autoincrement())
+  /// 幼儿 ID
+  childId                    Int
+  /// 所属幼儿；删除幼儿时级联删除本表相关行
+  child                      Child                  @relation(fields: [childId], references: [id], onDelete: Cascade)
+  /// 流程状态：草稿 / 采集中 / 转写中 / 分析中 / 已完成 / 已归档（见枚举 ListeningSessionStatus）
+  status                     ListeningSessionStatus @default(draft)
+  /// 档案标题或本次一对一倾听主题
+  title                      String
+  /// 观察发生的完整日期时间（与录音、情境等业务对齐）
+  observedAt                 DateTime
+  /// 卡片展示用日期（字符串，如 "2024-03-15"）
+  displayDate                String
+  /// 本条记录对应的年龄段快照（可选，与当时班级或幼儿年龄段一致即可）
+  ageBandAtSession           GradeBand?
+  /// 预留：将来关联 MediaAsset 封面资源；当前未建 Prisma 关系
+  coverMediaId               Int?
+  /// 幼儿画语表征图 URL（如 S3）；教师端列表图、详情与导出均用此字段
+  childArtImageUrl           String?
+  /// 个性发展分析摘要（提示词目标约 100～150 字，可略长）；在「保存记录」流程中由 agent3 写入，供后续个别化分析作提示
+  developmentAnalysisSnippet String?
+  /// 正文或全文的短摘要片段（列表预览、提示词等）
+  summarySnippet             String?
+  /// 档案小结 / 综合描述（较长说明文字）
+  summary                    String                 @default("")
+  /// 录音转写或教师手打的谈话记录文本
+  recordingTranscript        String                 @default("")
+  /// 基于画语图的多模态 AI「分析解读」生成结果
+  analysisInterpretation     String                 @default("")
+  /// 「教师支持策略」文本 AI 生成结果
+  teacherSupportStrategies   String                 @default("")
+  /// 「指导建议（家长）」文本 AI 生成结果
+  parentGuidanceAdvice       String                 @default("")
+  /// 教师本人撰写的倾听后反思
+  teacherReflection          String                 @default("")
+  /// 最近一次导出成长档案 PDF 的公网 URL（S3/CDN）
+  exportPdfUrl               String?
+  /// 与 `exportPdfUrl` 对应的缓存键（导出章节 + 内容指纹 + 幼儿姓名等，见服务端 `buildPortfolioPdfCacheKey`）
+  exportPdfCacheKey          String?
+  /// 创建时间
+  createdAt                  DateTime               @default(now())
+  /// 最后更新时间（Prisma 自动维护）
+  updatedAt                  DateTime               @updatedAt
+
+  /// 指向本档案的个体 AI 分析（Markdown 主文等）
+  aiIndividualAnalyses AiIndividualAnalysis[]
+
+  /// 按幼儿 + 观察时间查询（时间线、排序）
+  @@index([childId, observedAt])
+  /// 按幼儿 + 状态筛选（如仅看草稿）
+  @@index([childId, status])
+  /// 按幼儿列出全部档案
+  @@index([childId])
+  @@map("portfolio_archive_items")
+}

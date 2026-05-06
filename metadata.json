@@ -1,0 +1,6 @@
+{
+  "name": "幼儿一对一倾听系统",
+  "description": "一个用于记录、分析和分享幼儿倾听记录的系统，包含教师端和家长端。",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

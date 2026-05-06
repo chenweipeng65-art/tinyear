@@ -1,0 +1,16 @@
+// 当前阶段使用的枚举（其余业务枚举待功能落地后再加回 schema）
+
+enum GradeBand {
+  small
+  medium
+  large
+}
+
+enum ListeningSessionStatus {
+  draft
+  collecting
+  transcribing
+  analyzing
+  completed
+  archived
+}

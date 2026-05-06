@@ -1,0 +1,30 @@
+// 班级、教师（设计文档 §5.1、§5.2；Prisma 模型名避免关键字 Class → SchoolClass）
+
+model SchoolClass {
+  id               Int               @id @default(autoincrement())
+  name             String
+  gradeBand        GradeBand
+  schoolYear       String?
+  /// 为 true 时出现在教师端班级列表并可选用；管理端可关闭以隐藏整班
+  teacherVisible   Boolean           @default(true)
+  /// 全园仅宜一个为 true：教师端与家长端未记住选择时的默认班级；与 teacherVisible 独立，但设为默认时会强制 teacherVisible=true
+  defaultForTeacher Boolean          @default(false)
+  createdAt        DateTime          @default(now())
+
+  children         Child[]
+  aiClassAnalyses  AiClassAnalysis[]
+
+  @@index([gradeBand])
+  @@map("classes")
+}
+
+// 教师
+model Teacher {
+  id                 Int                 @id @default(autoincrement()) // 主键
+  displayName        String                                      // 展示名
+  loginIdentifier    String?             @unique                 // 登录用，演示期可空
+  passwordHash       String?                                      // 密码哈希，M5 再非空，M1 可仅占位
+  createdAt          DateTime            @default(now())         // 创建时间
+
+  @@map("teachers")
+}

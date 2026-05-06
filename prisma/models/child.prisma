@@ -1,0 +1,25 @@
+// 幼儿主数据（§5.3）；头像等由 seed / API 提供，前端只读
+
+model Child {
+  id                Int         @id @default(autoincrement())
+  classId           Int
+  schoolClass       SchoolClass @relation(fields: [classId], references: [id], onDelete: Restrict)
+  displayName       String
+  /// 教师端展示用脱敏姓名（写入时由 displayName 计算；家长端仍用 displayName）
+  displayNameMasked String @default("")
+  /** 头像图片 URL；与家长端、教师档案卡片共用 */
+  avatarUrl         String?
+  /** 家长首次登录绑定后写入；管理端 Excel 导入不设此项 */
+  idCardLastSixHash String?
+  ageBand           GradeBand?
+  notes             String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  portfolioItems         PortfolioArchiveItem[]
+  aiIndividualAnalyses   AiIndividualAnalysis[]
+
+  @@index([classId])
+  @@unique([classId, displayName])
+  @@map("children")
+}
